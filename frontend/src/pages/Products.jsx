@@ -3,6 +3,7 @@ import { Package, Plus, Search, Pencil, Trash2 } from 'lucide-react';
 import api from '../api/axios';
 
 const categories = ['Grains', 'Cooking', 'Groceries', 'Pulses', 'Personal Care', 'General'];
+const DEFAULT_IMAGE = 'https://placehold.co/400x400/eeeeee/333333?text=Product';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -17,13 +18,13 @@ export default function Products() {
     retailPrice: '',
     stock: '',
     unit: 'kg',
-    imageUrl: 'https://picsum.photos/seed/grocery/200/200'
+    imageUrl: DEFAULT_IMAGE
   });
 
   const fetchProducts = async () => {
     try {
       const { data } = await api.get('/products');
-      setProducts(data);
+      setProducts(Array.isArray(data) ? data : []);
     } catch {
       setProducts([]);
     } finally {
@@ -43,7 +44,7 @@ export default function Products() {
       retailPrice: '',
       stock: '',
       unit: 'kg',
-      imageUrl: 'https://picsum.photos/seed/grocery/200/200'
+      imageUrl: DEFAULT_IMAGE
     });
     setEditing(null);
     setShowForm(false);
@@ -79,7 +80,7 @@ export default function Products() {
       retailPrice: p.retailPrice,
       stock: p.stock,
       unit: p.unit || 'kg',
-      imageUrl: p.imageUrl || 'https://picsum.photos/seed/grocery/200/200'
+      imageUrl: p.imageUrl || DEFAULT_IMAGE
     });
     setShowForm(true);
   };
@@ -186,6 +187,9 @@ export default function Products() {
                 <option value="L">L</option>
                 <option value="pcs">pcs</option>
                 <option value="pack">pack</option>
+                <option value="bag">bag</option>
+                <option value="box">box</option>
+                <option value="tin">tin</option>
               </select>
             </div>
             <div className="sm:col-span-2 flex gap-2">
@@ -231,9 +235,9 @@ export default function Products() {
               key={p._id}
               className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="aspect-square bg-slate-100">
+              <div className="aspect-square bg-slate-100 overflow-hidden">
                 <img
-                  src={p.imageUrl || 'https://picsum.photos/seed/grocery/200/200'}
+                  src={p.imageUrl || DEFAULT_IMAGE}
                   alt={p.name}
                   className="w-full h-full object-cover"
                 />

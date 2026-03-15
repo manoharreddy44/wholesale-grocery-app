@@ -5,11 +5,51 @@ const Customer = require('./models/Customer');
 const User = require('./models/User');
 
 const products = [
-  { name: 'Rice', category: 'Grains', wholesalePrice: 45, retailPrice: 50, stock: 500, unit: 'kg', imageUrl: 'https://picsum.photos/seed/rice/200/200' },
-  { name: 'Oil', category: 'Cooking', wholesalePrice: 180, retailPrice: 200, stock: 100, unit: 'L', imageUrl: 'https://picsum.photos/seed/oil/200/200' },
-  { name: 'Sugar', category: 'Groceries', wholesalePrice: 55, retailPrice: 60, stock: 200, unit: 'kg', imageUrl: 'https://picsum.photos/seed/sugar/200/200' },
-  { name: 'Dal', category: 'Pulses', wholesalePrice: 120, retailPrice: 135, stock: 150, unit: 'kg', imageUrl: 'https://picsum.photos/seed/dal/200/200' },
-  { name: 'Soap', category: 'Personal Care', wholesalePrice: 25, retailPrice: 30, stock: 300, unit: 'pcs', imageUrl: 'https://picsum.photos/seed/soap/200/200' }
+  {
+    name: 'Sugar 50kg Bag',
+    category: 'Groceries',
+    wholesalePrice: 2400,
+    retailPrice: 2600,
+    stock: 80,
+    unit: 'bag',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Sugar+50kg+Bag'
+  },
+  {
+    name: 'Sugar Sachets (Box of 500)',
+    category: 'Groceries',
+    wholesalePrice: 280,
+    retailPrice: 320,
+    stock: 120,
+    unit: 'box',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Sugar+Sachets+Box'
+  },
+  {
+    name: 'Sona Masoori Rice 25kg',
+    category: 'Grains',
+    wholesalePrice: 1125,
+    retailPrice: 1250,
+    stock: 100,
+    unit: 'bag',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Rice+25kg+Bag'
+  },
+  {
+    name: 'Fortune Sunflower Oil 15L',
+    category: 'Cooking',
+    wholesalePrice: 2100,
+    retailPrice: 2350,
+    stock: 50,
+    unit: 'tin',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Oil+15L+Tin'
+  },
+  {
+    name: 'Toor Dal 30kg',
+    category: 'Pulses',
+    wholesalePrice: 3600,
+    retailPrice: 3900,
+    stock: 60,
+    unit: 'bag',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Toor+Dal+30kg'
+  }
 ];
 
 const customers = [

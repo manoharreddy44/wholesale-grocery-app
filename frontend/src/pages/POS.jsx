@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ShoppingCart, Search, Plus, Minus, Trash2, CreditCard, Banknote } from 'lucide-react';
 import api from '../api/axios';
 
+const DEFAULT_IMAGE = 'https://placehold.co/400x400/eeeeee/333333?text=Product';
+
 export default function POS() {
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -14,20 +16,20 @@ export default function POS() {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       try {
         const [productsRes, customersRes] = await Promise.all([
           api.get('/products'),
           api.get('/customers')
         ]);
-        setProducts(productsRes.data);
-        setCustomers(customersRes.data);
+        setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
+        setCustomers(Array.isArray(customersRes.data) ? customersRes.data : []);
       } catch {
         setProducts([]);
         setCustomers([]);
       }
     };
-    fetch();
+    fetchData();
   }, []);
 
   const filteredProducts = products.filter(
@@ -46,7 +48,16 @@ export default function POS() {
           i.productId === product._id ? { ...i, qty: i.qty + 1 } : i
         );
       }
-      return [...prev, { productId: product._id, name: product.name, price: product.wholesalePrice, qty: 1, maxStock: product.stock }];
+      return [
+        ...prev,
+        {
+          productId: product._id,
+          name: product.name,
+          price: product.wholesalePrice,
+          qty: 1,
+          maxStock: product.stock
+        }
+      ];
     });
   };
 
@@ -70,7 +81,7 @@ export default function POS() {
   const discountAmount = Number(discount) || 0;
   const total = Math.max(0, subtotal - discountAmount);
 
-  const completeOrder = async () => {
+  const handleCheckout = async () => {
     if (cart.length === 0) {
       setMessage({ type: 'error', text: 'Add at least one item to cart' });
       return;
@@ -91,17 +102,17 @@ export default function POS() {
       setCart([]);
       setDiscount(0);
       setMessage({ type: 'success', text: 'Order completed successfully!' });
+      alert('Order completed successfully!');
       const [productsRes, customersRes] = await Promise.all([
         api.get('/products'),
         api.get('/customers')
       ]);
-      setProducts(productsRes.data);
-      setCustomers(customersRes.data);
+      setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
+      setCustomers(Array.isArray(customersRes.data) ? customersRes.data : []);
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Failed to complete order'
-      });
+      const msg = err.response?.data?.message || 'Failed to complete order';
+      setMessage({ type: 'error', text: msg });
+      alert(msg);
     } finally {
       setLoading(false);
     }
@@ -135,7 +146,7 @@ export default function POS() {
                 >
                   <div className="aspect-square rounded-lg bg-slate-100 mb-2 overflow-hidden">
                     <img
-                      src={p.imageUrl || 'https://picsum.photos/seed/grocery/200/200'}
+                      src={p.imageUrl || DEFAULT_IMAGE}
                       alt={p.name}
                       className="w-full h-full object-cover"
                     />
@@ -183,7 +194,7 @@ export default function POS() {
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>
-                      <span className="w-14 text-right font-medium">₹{i.price * i.qty}</span>
+                      <span className="w-14 text-right font-medium">₹{(i.price * i.qty).toFixed(2)}</span>
                       <button
                         type="button"
                         onClick={() => removeFromCart(i.productId)}
@@ -271,7 +282,7 @@ export default function POS() {
               )}
               <button
                 type="button"
-                onClick={completeOrder}
+                onClick={handleCheckout}
                 disabled={loading || cart.length === 0}
                 className="w-full py-3.5 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 transition"
               >
