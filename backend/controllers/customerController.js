@@ -11,7 +11,17 @@ const getAll = async (req, res) => {
 
 const getOne = async (req, res) => {
   try {
-    const customer = await Customer.findById(req.params.id);
+    const customer = await Customer.findById(req.params.id).select('-password');
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
+    res.json(customer);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const getMe = async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.user.id).select('-password');
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
     res.json(customer);
   } catch (err) {
@@ -21,7 +31,7 @@ const getOne = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { shopName, ownerName, phone, village, dueAmount } = req.body;
+    const { shopName, ownerName, phone, village, dueAmount, password } = req.body;
     if (!shopName || !ownerName || !phone) {
       return res.status(400).json({ message: 'Shop name, owner name and phone are required' });
     }
@@ -30,7 +40,8 @@ const create = async (req, res) => {
       ownerName,
       phone,
       village: village || '',
-      dueAmount: Number(dueAmount) || 0
+      dueAmount: Number(dueAmount) || 0,
+      password: password || 'password123'
     });
     res.status(201).json(customer);
   } catch (err) {
@@ -40,9 +51,12 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   try {
+    const { password, ...updates } = req.body;
+    const updateDoc = { ...updates };
+    if (password !== undefined && password !== '') updateDoc.password = password;
     const customer = await Customer.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateDoc,
       { new: true, runValidators: true }
     );
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
@@ -62,4 +76,4 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getOne, create, update, remove };
+module.exports = { getAll, getOne, getMe, create, update, remove };

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Customer = require('../models/Customer');
 const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
@@ -7,29 +8,53 @@ const login = async (req, res) => {
     if (!phone || !password) {
       return res.status(400).json({ message: 'Phone and password are required' });
     }
+
     const user = await User.findOne({ phone });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid phone or password' });
-    }
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid phone or password' });
-    }
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '7d' }
-    );
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        shopName: user.shopName,
-        ownerName: user.ownerName,
-        phone: user.phone,
-        role: user.role
+    if (user) {
+      const isMatch = await user.comparePassword(password);
+      if (isMatch) {
+        const token = jwt.sign(
+          { id: user._id, role: user.role },
+          process.env.JWT_SECRET || 'fallback-secret',
+          { expiresIn: '7d' }
+        );
+        return res.json({
+          token,
+          user: {
+            id: user._id,
+            shopName: user.shopName,
+            ownerName: user.ownerName,
+            phone: user.phone,
+            role: user.role
+          }
+        });
       }
-    });
+    }
+
+    const customer = await Customer.findOne({ phone });
+    if (customer) {
+      const isMatch = await customer.comparePassword(password);
+      if (isMatch) {
+        const token = jwt.sign(
+          { id: customer._id, role: 'customer' },
+          process.env.JWT_SECRET || 'fallback-secret',
+          { expiresIn: '7d' }
+        );
+        return res.json({
+          token,
+          user: {
+            id: customer._id,
+            shopName: customer.shopName,
+            ownerName: customer.ownerName,
+            phone: customer.phone,
+            role: 'customer',
+            dueAmount: customer.dueAmount
+          }
+        });
+      }
+    }
+
+    return res.status(401).json({ message: 'Invalid phone or password' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -1,16 +1,13 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Users, ShoppingCart, ClipboardList, LogOut, Menu, X } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, ShoppingBag, LogOut, Menu, X } from 'lucide-react';
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/orders', icon: ClipboardList, label: 'Orders' },
-  { to: '/products', icon: Package, label: 'Products' },
-  { to: '/customers', icon: Users, label: 'Customers' },
-  { to: '/pos', icon: ShoppingCart, label: 'POS / New Order' }
+  { to: '/', icon: LayoutDashboard, label: 'My Dashboard' },
+  { to: '/catalog', icon: ShoppingBag, label: 'Browse Catalog' }
 ];
 
-export default function Layout() {
+export default function CustomerLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -28,7 +25,7 @@ export default function Layout() {
         }`}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700">
-          <span className="font-semibold text-lg">Wholesale Grocery</span>
+          <span className="font-semibold text-lg">Customer Portal</span>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-2 rounded-lg hover:bg-slate-800"
@@ -75,7 +72,7 @@ export default function Layout() {
         </header>
 
         <main className="flex-1 p-4 lg:p-6 overflow-auto">
-          <Outlet />
+          {children}
         </main>
       </div>
 

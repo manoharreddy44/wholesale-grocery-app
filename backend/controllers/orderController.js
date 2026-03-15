@@ -26,13 +26,30 @@ const getOne = async (req, res) => {
   }
 };
 
+const getOrdersByCustomer = async (req, res) => {
+  try {
+    const orders = await Order.find({ customerId: req.params.id })
+      .populate('customerId', 'shopName ownerName phone village')
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message || 'Failed to fetch orders' });
+  }
+};
+
 /**
- * Create order: validates items, calculates total on backend, deducts product stock,
- * and increments customer dueAmount when paymentType is 'credit'.
+ * Create order: validates items, calculates total on backend.
+ * If admin: deducts stock and adds to Khata for credit. If customer: status pending, no stock/Khata change.
  */
 const create = async (req, res) => {
   try {
-    const { customerId, items, discount, paymentType } = req.body;
+    const isCustomerOrder = req.user && req.user.role === 'customer';
+    let { customerId, items, discount, paymentType } = req.body;
+
+    if (isCustomerOrder) {
+      customerId = req.user.id;
+      paymentType = 'credit';
+    }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
@@ -118,6 +135,7 @@ const create = async (req, res) => {
 
     const discountAmount = Math.max(0, Number(discount) || 0);
     const total = Math.max(0, subtotal - discountAmount);
+    const status = isCustomerOrder ? 'pending' : 'completed';
 
     const order = await Order.create({
       customerId: customerId || undefined,
@@ -126,51 +144,53 @@ const create = async (req, res) => {
       discount: discountAmount,
       total,
       paymentType,
-      status: 'completed'
+      status
     });
 
-    for (const item of orderItems) {
-      try {
-        await Product.findByIdAndUpdate(item.productId, {
-          $inc: { stock: -item.qty }
-        });
-      } catch (e) {
-        console.error('Failed to deduct stock for product', item.productId, e);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to update product stock. Order was created but inventory may be inconsistent.'
-        });
-      }
-    }
-
-    if (paymentType === 'credit' && customerId) {
-      let customer;
-      try {
-        customer = await Customer.findById(customerId);
-      } catch (e) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid customerId'
-        });
+    if (!isCustomerOrder) {
+      for (const item of orderItems) {
+        try {
+          await Product.findByIdAndUpdate(item.productId, {
+            $inc: { stock: -item.qty }
+          });
+        } catch (e) {
+          console.error('Failed to deduct stock for product', item.productId, e);
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to update product stock. Order was created but inventory may be inconsistent.'
+          });
+        }
       }
 
-      if (!customer) {
-        return res.status(400).json({
-          success: false,
-          message: 'Customer not found for credit payment'
-        });
-      }
+      if (paymentType === 'credit' && customerId) {
+        let customer;
+        try {
+          customer = await Customer.findById(customerId);
+        } catch (e) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid customerId'
+          });
+        }
 
-      try {
-        await Customer.findByIdAndUpdate(customerId, {
-          $inc: { dueAmount: total }
-        });
-      } catch (e) {
-        console.error('Failed to update customer dueAmount', customerId, e);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to update customer due amount. Order was created but khata may be inconsistent.'
-        });
+        if (!customer) {
+          return res.status(400).json({
+            success: false,
+            message: 'Customer not found for credit payment'
+          });
+        }
+
+        try {
+          await Customer.findByIdAndUpdate(customerId, {
+            $inc: { dueAmount: total }
+          });
+        } catch (e) {
+          console.error('Failed to update customer dueAmount', customerId, e);
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to update customer due amount. Order was created but khata may be inconsistent.'
+          });
+        }
       }
     }
 
@@ -188,19 +208,37 @@ const create = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    ).populate('customerId', 'shopName ownerName phone village');
-
+    const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
-    res.json(order);
+
+    const newStatus = req.body.status;
+    const wasPending = order.status === 'pending';
+
+    if (newStatus === 'completed' && wasPending) {
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.productId, {
+          $inc: { stock: -item.qty }
+        });
+      }
+      if (order.paymentType === 'credit' && order.customerId) {
+        await Customer.findByIdAndUpdate(order.customerId, {
+          $inc: { dueAmount: order.total }
+        });
+      }
+    }
+
+    const updated = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status: newStatus },
+      { new: true }
+    ).populate('customerId', 'shopName ownerName phone village');
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message || 'Failed to update order status' });
   }
 };
 
-module.exports = { getAll, getOne, create, updateStatus };
+module.exports = { getAll, getOne, getOrdersByCustomer, create, updateStatus };
