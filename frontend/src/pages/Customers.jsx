@@ -12,13 +12,14 @@ export default function Customers() {
     shopName: '',
     ownerName: '',
     phone: '',
-    village: ''
+    village: '',
+    dueAmount: ''
   });
 
   const fetchCustomers = async () => {
     try {
       const { data } = await api.get('/customers');
-      setCustomers(data);
+      setCustomers(Array.isArray(data) ? data : []);
     } catch {
       setCustomers([]);
     } finally {
@@ -31,7 +32,7 @@ export default function Customers() {
   }, []);
 
   const resetForm = () => {
-    setForm({ shopName: '', ownerName: '', phone: '', village: '' });
+    setForm({ shopName: '', ownerName: '', phone: '', village: '', dueAmount: '' });
     setEditing(null);
     setShowForm(false);
   };
@@ -39,10 +40,17 @@ export default function Customers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        shopName: form.shopName,
+        ownerName: form.ownerName,
+        phone: form.phone,
+        village: form.village || '',
+        dueAmount: Number(form.dueAmount) || 0
+      };
       if (editing) {
-        await api.put(`/customers/${editing._id}`, form);
+        await api.put(`/customers/${editing._id}`, payload);
       } else {
-        await api.post('/customers', form);
+        await api.post('/customers', payload);
       }
       resetForm();
       fetchCustomers();
@@ -57,7 +65,8 @@ export default function Customers() {
       shopName: c.shopName,
       ownerName: c.ownerName,
       phone: c.phone,
-      village: c.village || ''
+      village: c.village || '',
+      dueAmount: c.dueAmount ?? ''
     });
     setShowForm(true);
   };
@@ -131,6 +140,18 @@ export default function Customers() {
               <input
                 value={form.village}
                 onChange={(e) => setForm((f) => ({ ...f, village: e.target.value }))}
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Due (Khata) ₹</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.dueAmount}
+                onChange={(e) => setForm((f) => ({ ...f, dueAmount: e.target.value }))}
+                placeholder="0"
                 className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>

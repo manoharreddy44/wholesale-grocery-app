@@ -21,7 +21,7 @@ const getOne = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { shopName, ownerName, phone, village } = req.body;
+    const { shopName, ownerName, phone, village, dueAmount } = req.body;
     if (!shopName || !ownerName || !phone) {
       return res.status(400).json({ message: 'Shop name, owner name and phone are required' });
     }
@@ -30,7 +30,7 @@ const create = async (req, res) => {
       ownerName,
       phone,
       village: village || '',
-      dueAmount: 0
+      dueAmount: Number(dueAmount) || 0
     });
     res.status(201).json(customer);
   } catch (err) {

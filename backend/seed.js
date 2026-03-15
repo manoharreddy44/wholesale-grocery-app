@@ -24,7 +24,7 @@ const products = [
     imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Sugar+Sachets+Box'
   },
   {
-    name: 'Sona Masoori Rice 25kg',
+    name: 'Sona Masoori Rice 25kg Bag',
     category: 'Grains',
     wholesalePrice: 1125,
     retailPrice: 1250,
@@ -33,7 +33,7 @@ const products = [
     imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Rice+25kg+Bag'
   },
   {
-    name: 'Fortune Sunflower Oil 15L',
+    name: 'Fortune Sunflower Oil 15L Tin',
     category: 'Cooking',
     wholesalePrice: 2100,
     retailPrice: 2350,
@@ -49,6 +49,51 @@ const products = [
     stock: 60,
     unit: 'bag',
     imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Toor+Dal+30kg'
+  },
+  {
+    name: 'Surf Excel Matic 10kg',
+    category: 'Personal Care',
+    wholesalePrice: 850,
+    retailPrice: 950,
+    stock: 75,
+    unit: 'kg',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Surf+Excel+10kg'
+  },
+  {
+    name: 'Tata Tea Gold 1kg',
+    category: 'Groceries',
+    wholesalePrice: 420,
+    retailPrice: 480,
+    stock: 150,
+    unit: 'kg',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Tea+1kg'
+  },
+  {
+    name: 'Tata Salt 1kg (Carton 50)',
+    category: 'Groceries',
+    wholesalePrice: 18,
+    retailPrice: 22,
+    stock: 200,
+    unit: 'carton',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Salt+1kg+Carton'
+  },
+  {
+    name: 'Lifebuoy Soap 75g (Box of 24)',
+    category: 'Personal Care',
+    wholesalePrice: 288,
+    retailPrice: 336,
+    stock: 80,
+    unit: 'box',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Lifebuoy+Soap+Box'
+  },
+  {
+    name: 'Parle-G Biscuit 1kg (Pack of 10)',
+    category: 'Groceries',
+    wholesalePrice: 520,
+    retailPrice: 600,
+    stock: 100,
+    unit: 'pack',
+    imageUrl: 'https://placehold.co/400x400/eeeeee/333333?text=Parle-G+1kg+Pack'
   }
 ];
 
@@ -72,7 +117,7 @@ async function seed() {
 
     await Product.deleteMany({});
     await Product.insertMany(products);
-    console.log('Inserted 5 products');
+    console.log('Inserted 10 products');
 
     await Customer.deleteMany({});
     await Customer.insertMany(customers);

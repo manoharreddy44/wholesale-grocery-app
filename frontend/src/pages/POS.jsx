@@ -10,10 +10,19 @@ export default function POS() {
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [customerDropdownOpen, setCustomerDropdownOpen] = useState(false);
   const [paymentType, setPaymentType] = useState('cash');
   const [discount, setDiscount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  const filteredCustomers = customers.filter((c) => {
+    const term = customerSearch.toLowerCase();
+    const text = `${c.shopName} ${c.ownerName} ${c.phone} ${c.village || ''}`.toLowerCase();
+    return text.includes(term);
+  });
+  const selectedCustomer = customers.find((c) => c._id === selectedCustomerId);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -144,11 +153,11 @@ export default function POS() {
                   disabled={p.stock < 1}
                   className="text-left rounded-xl border border-slate-200 p-3 hover:border-primary-300 hover:bg-primary-50/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
-                  <div className="aspect-square rounded-lg bg-slate-100 mb-2 overflow-hidden">
+                  <div className="w-full h-48 bg-slate-100 mb-2 overflow-hidden rounded-md">
                     <img
                       src={p.imageUrl || DEFAULT_IMAGE}
                       alt={p.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-48 object-cover rounded-md"
                     />
                   </div>
                   <p className="font-medium text-slate-800 truncate text-sm">{p.name}</p>
@@ -227,20 +236,73 @@ export default function POS() {
                 <span>Total</span>
                 <span className="text-primary-600">₹{total.toFixed(2)}</span>
               </div>
-              <div>
+              <div className="relative">
                 <label className="block text-sm text-slate-600 mb-1">Customer (for Khata)</label>
-                <select
-                  value={selectedCustomerId}
-                  onChange={(e) => setSelectedCustomerId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Walk-in / Cash only</option>
-                  {customers.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.shopName} – {c.ownerName}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={selectedCustomer ? `${selectedCustomer.shopName} – ${selectedCustomer.ownerName}` : customerSearch}
+                    onChange={(e) => {
+                      setCustomerSearch(e.target.value);
+                      setSelectedCustomerId('');
+                      setCustomerDropdownOpen(true);
+                    }}
+                    onFocus={() => setCustomerDropdownOpen(true)}
+                    onBlur={() => setTimeout(() => setCustomerDropdownOpen(false), 200)}
+                    placeholder="Search or select customer..."
+                    className="w-full pl-9 pr-8 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  />
+                  {selectedCustomerId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCustomerId('');
+                        setCustomerSearch('');
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      title="Clear"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {customerDropdownOpen && (
+                  <ul className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg py-1">
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedCustomerId('');
+                          setCustomerSearch('');
+                          setCustomerDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 ${!selectedCustomerId && !customerSearch ? 'bg-primary-50 text-primary-700' : ''}`}
+                      >
+                        Walk-in / Cash only
+                      </button>
+                    </li>
+                    {filteredCustomers.length === 0 ? (
+                      <li className="px-3 py-2 text-sm text-slate-500">No customer found</li>
+                    ) : (
+                      filteredCustomers.map((c) => (
+                        <li key={c._id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCustomerId(c._id);
+                              setCustomerSearch('');
+                              setCustomerDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 ${selectedCustomerId === c._id ? 'bg-primary-50 text-primary-700' : ''}`}
+                          >
+                            {c.shopName} – {c.ownerName}
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                )}
               </div>
               <div>
                 <label className="block text-sm text-slate-600 mb-2">Payment</label>

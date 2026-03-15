@@ -235,11 +235,11 @@ export default function Products() {
               key={p._id}
               className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="aspect-square bg-slate-100 overflow-hidden">
+              <div className="w-full h-48 bg-slate-100 overflow-hidden rounded-md">
                 <img
                   src={p.imageUrl || DEFAULT_IMAGE}
                   alt={p.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-48 object-cover rounded-md"
                 />
               </div>
               <div className="p-3">
