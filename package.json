@@ -1,0 +1,16 @@
+{
+  "name": "wholesale-grocery-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "B2B Wholesale Grocery Management",
+  "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && node seed.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
