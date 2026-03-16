@@ -9,6 +9,8 @@ import POS from './pages/POS';
 import CustomerDashboard from './pages/CustomerDashboard';
 import CustomerCatalog from './pages/CustomerCatalog';
 import Orders from './pages/Orders';
+import Payments from './pages/Payments';
+import Reports from './pages/Reports';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -60,6 +62,8 @@ function App() {
         <Route index element={<RoleBasedDashboard />} />
         <Route path="catalog" element={<CustomerCatalog />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="payments" element={<Payments />} />
+        <Route path="reports" element={<Reports />} />
         <Route path="products" element={<Products />} />
         <Route path="customers" element={<Customers />} />
         <Route path="pos" element={<POS />} />

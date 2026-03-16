@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Users, ShoppingCart, ClipboardList, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, Users, ShoppingCart, ClipboardList, Wallet, BarChart3, LogOut, Menu, X } from 'lucide-react';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/orders', icon: ClipboardList, label: 'Orders' },
+  { to: '/payments', icon: Wallet, label: 'Payments' },
+  { to: '/reports', icon: BarChart3, label: 'Reports' },
   { to: '/products', icon: Package, label: 'Products' },
   { to: '/customers', icon: Users, label: 'Customers' },
   { to: '/pos', icon: ShoppingCart, label: 'POS / New Order' }
